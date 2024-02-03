@@ -1,40 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
+import { View, Text, TextInput,  TouchableOpacity,  StyleSheet,  Image,  Modal,  KeyboardAvoidingView,} from 'react-native';
+import ChatbotScreen from './ChatbotScreen';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loginStatus, setLoginStatus] = useState('');
   const [isSignUpScreen, setIsSignUpScreen] = useState(false);
-
-  const onPressLogin = () => {
-    if (state.email !== '' && state.password !== '') {
-      setLoginStatus('You are in');
-    } else {
-      setLoginStatus('Incorrect username/password');
-    }
-    setModalVisible(true);
-  };
-
-  const onPressForgotPassword = () => {
-    // For the forgot password operation
-  };
-
-  const onPressSignUp = () => {
-    setIsSignUpScreen(true);
-  };
-
-  const onPressCloseSignUp = () => {
-    setIsSignUpScreen(false);
-  };
-
-  const onPressConfirmSignUp = () => {
-    if (signupState.username !== '' && signupState.email !== '' && signupState.password !== '') {
-      setLoginStatus('Login using the credentials you have input in signup');
-    } else {
-      setLoginStatus('All input fields must be filled');
-    }
-    setModalVisible(true);
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [state, setState] = useState({
     email: '',
@@ -51,77 +23,132 @@ const App = () => {
     setModalVisible(false);
   };
 
-  if (isSignUpScreen) {
-    return (
-      <View style={styles.container}>
-        <Image source={require('./assets/logo.png')} style={styles.logo} />
-        <Text style={styles.title}>Signup Form</Text>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.inputText}
-            placeholder="Username"
-            placeholderTextColor="#006400"
-            onChangeText={(text) => setSignupState({ ...signupState, username: text })}
-          />
-        </View>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.inputText}
-            placeholder="Email"
-            placeholderTextColor="#006400"
-            onChangeText={(text) => setSignupState({ ...signupState, email: text })}
-          />
-        </View>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.inputText}
-            secureTextEntry
-            placeholder="Password"
-            placeholderTextColor="#006400"
-            onChangeText={(text) => setSignupState({ ...signupState, password: text })}
-          />
-        </View>
-        <TouchableOpacity onPress={onPressConfirmSignUp} style={styles.signupBtn}>
-          <Text style={styles.signupText}>Signup</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onPressCloseSignUp} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>Back to Login</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const loginAsGuest = () => {
+    setIsSignUpScreen(false);
+    setIsLoggedIn(true);
+  };
+
+  const onPressLogin = () => {
+    if (state.email === signupState.email && state.password === signupState.password) {
+      setLoginStatus('You are in');
+      setIsLoggedIn(true);
+    } else {
+      setLoginStatus('Incorrect username/password');
+    }
+    setModalVisible(true);
+  };
+
+  const onPressSignUp = () => {
+    setIsSignUpScreen(true);
+  };
+
+  const onPressCloseSignUp = () => {
+    setIsSignUpScreen(false);
+  };
+
+  const onPressConfirmSignUp = () => {
+    if (signupState.username !== '' && signupState.email !== '' && signupState.password !== '') {
+      setLoginStatus('Login using the credentials you have input in signup');
+      setIsLoggedIn(true);
+    } else {
+      setLoginStatus('All input fields must be filled');
+    }
+    setModalVisible(true);
+  };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
       <Image source={require('./assets/logo.png')} style={styles.logo} />
 
-      <Text style={styles.title}>Pawpal Hub</Text>
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.inputText}
-          placeholder="Username"
-          placeholderTextColor="#006400"
-          onChangeText={(text) => setState({ ...state, email: text })}
-        />
-      </View>
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.inputText}
-          secureTextEntry
-          placeholder="Password"
-          placeholderTextColor="#006400"
-          onChangeText={(text) => setState({ ...state, password: text })}
-        />
-      </View>
-      <TouchableOpacity onPress={onPressForgotPassword}>
-        <Text style={styles.forgotAndSignUpText}>Forgot Password?</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onPressLogin} style={styles.loginBtn}>
-        <Text style={styles.loginText}>Login </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onPressSignUp} style={styles.signupBtn}>
-        <Text style={styles.signupText}>Signup</Text>
-      </TouchableOpacity>
+      {!isLoggedIn && !isSignUpScreen && (
+        <>
+          <Text style={styles.title}>Pawpal Hub</Text>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Username"
+              placeholderTextColor="#006400"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              autoFocus={true}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                passwordInput.current.focus();
+              }}
+              blurOnSubmit={false}
+              onChangeText={(text) => setState({ ...state, email: text })}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Password"
+              placeholderTextColor="#006400"
+              secureTextEntry={true}
+              ref={(input) => {
+                passwordInput = input;
+              }}
+              returnKeyType="go"
+              onChangeText={(text) => setState({ ...state, password: text })}
+            />
+          </View>
+          <TouchableOpacity onPress={onPressLogin} style={styles.loginBtn}>
+            <Text style={styles.loginText}>Login </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={loginAsGuest} style={styles.signupBtn}>
+            <Text style={styles.signupText}>Login as Guest</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onPressSignUp} style={styles.signupBtn}>
+            <Text style={styles.signupText}>Signup</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {isSignUpScreen && (
+        <View style={styles.container}>
+          <Image source={require('./assets/logo.png')} style={styles.logo} />
+          <Text style={styles.title}>Signup Form</Text>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Username"
+              placeholderTextColor="#006400"
+              autoCapitalize="none"
+              onChangeText={(text) => setSignupState({ ...signupState, username: text })}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Email"
+              placeholderTextColor="#006400"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              onChangeText={(text) => setSignupState({ ...signupState, email: text })}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Password"
+              placeholderTextColor="#006400"
+              secureTextEntry={true}
+              onChangeText={(text) => setSignupState({ ...signupState, password: text })}
+            />
+          </View>
+          <TouchableOpacity onPress={onPressConfirmSignUp} style={styles.signupBtn}>
+            <Text style={styles.signupText}>Signup</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onPressCloseSignUp} style={styles.backBtn}>
+            <Text style={styles.backBtnText}>Back to Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsSignUpScreen(false)} style={styles.signupBtn}>
+            <Text style={styles.signupText}>Chatbot</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={closeModal}>
         <View style={styles.modalView}>
@@ -131,9 +158,12 @@ const App = () => {
           </TouchableOpacity>
         </View>
       </Modal>
-    </View>
+
+      {isLoggedIn && <ChatbotScreen />}
+    </KeyboardAvoidingView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
